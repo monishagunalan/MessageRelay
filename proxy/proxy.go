@@ -11,6 +11,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
+var tableName = "SerialHostLookup"
+var region = "us-east-1"
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	director := func(req *http.Request) {
 		req.URL.Scheme = "http"
@@ -34,8 +37,6 @@ func main() {
 }
 
 func getHost(serial string) string {
-	tableName := "SerialHostLookup"
-	region := "us-east-1"
 	host := ""
 	svc := dynamodb.New(session.New(), aws.NewConfig().WithRegion(region))
 	input := &dynamodb.GetItemInput{
@@ -65,7 +66,9 @@ func getHost(serial string) string {
 			fmt.Println(err.Error())
 		}
 	} else {
-		host = *result.Item["host"].S
+		if result.Item != nil {
+			host = *result.Item["host"].S
+		}
 	}
 	return host
 }
